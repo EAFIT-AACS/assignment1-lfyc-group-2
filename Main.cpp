@@ -1,8 +1,8 @@
 //Aca va el codigo correspondiente a la actividad
+//implementación del algoritmo de minimizacion planteado por Kozen
 
 #include <iostream>
 #include <string>
-
 using namespace std;
 
 void menu();
@@ -12,10 +12,16 @@ int main(){
     return 0;
 }
 
-void menu() {
-    cout << "Bienvenido al sistema de registro de estudiantes" << endl;
-    cout << "1. Registrar estudiante" << endl;
-    cout << "2. Mostrar estudiantes" << endl;
-    cout << "3. Salir" << endl;
-    cout << "Ingrese la opcion que desea realizar: ";
+void menu(){
+int casos = 1;
+int estado = 1;
+
+    cout << "---------- Bienvenido al programa de minimizacion de automatas ----------" << endl;
+    cout << "Ingrese el numero de casos que le gustaria evaluar: " << endl;
+    cin >> casos;
+
+    for (int i=0; i<casos; i++){
+        cout << "Ingrese el numero de estados del automata: " << i+1 << endl;
+        cin >> estado;
+    }
 }
