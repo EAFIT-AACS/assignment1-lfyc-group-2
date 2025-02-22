@@ -14,12 +14,14 @@ int main(){
 }
 
 void readFile(){
-    ifstream archivo("file.txt");
+    ifstream archivo("files.txt");
     string line;
 
     if (!archivo) {
         cout << "Error al abrir el archivo, intentelo de nuevo" << endl;
         return;
-    }
+    } 
+
+    cout << "Archivo abierto exitosaente" << endl;
 };
 
