@@ -1,27 +1,25 @@
-//Aca va el codigo correspondiente a la actividad
 //implementación del algoritmo de minimizacion planteado por Kozen
 
+//Se incluyen las libreriás necesarias para la ejecución del programa
 #include <iostream>
+#include <fstream>
 #include <string>
 using namespace std;
 
-void menu();
+void readFile();
 
 int main(){
-    menu();
+    readFile();
     return 0;
 }
 
-void menu(){
-int casos = 1;
-int estado = 1;
+void readFile(){
+    ifstream archivo("file.txt");
+    string line;
 
-    cout << "---------- Bienvenido al programa de minimizacion de automatas ----------" << endl;
-    cout << "Ingrese el numero de casos que le gustaria evaluar: " << endl;
-    cin >> casos;
-
-    for (int i=0; i<casos; i++){
-        cout << "Ingrese el numero de estados del automata: " << i+1 << endl;
-        cin >> estado;
+    if (!archivo) {
+        cout << "Error al abrir el archivo, intentelo de nuevo" << endl;
+        return;
     }
-}
+};
+
