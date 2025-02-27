@@ -1,98 +1,117 @@
-//implementación del algoritmo de minimizacion planteado por Kozen
-
-//Se incluyen las libreriás necesarias para la ejecución del programa
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <set>
+#include <algorithm>
 using namespace std;
 
 void readFile();
-void minimizarDFA(int &numEstados, vector<string> &alfabeto, vector<int> &estadosFinales, vector<vector<int> > &MatrizTransicion);
-vector<string> alfabeto;
-vector<int> estadosFinales;
-vector<vector<int> > MatrizTransicion;
+void minimizarDFA(int numEstados, const vector<string> &alfabeto, const vector<int> &estadosFinales, const vector<vector<int>> &MatrizTransicion);
 
-int main(){
+int main() {
     readFile();
     return 0;
 }
 
-void readFile(){
-    ifstream archivo("File.txt"); // Abrimos el archivo que contiene los DFA´s a minimizar
-
+void readFile() {
+    ifstream archivo("file.txt");
     if (!archivo) {
-        cout << "Error al abrir el archivo, intentelo de nuevo" << endl;
+        cout << "Error al abrir el archivo, inténtelo de nuevo." << endl;
         return;
-    } 
-    
+    }
+
     string line;
-    getline(archivo, line); // Leemos la primera linea del archivo
-    int c = stoi(line); 
-    archivo.ignore(); // Ignoramos la siguiente linea del archivo
+    getline(archivo, line);
+    int c = stoi(line);
 
-    cout << "Numero de DFA´s a minimizar: " << c << endl;
+    cout << "Número de DFA's a minimizar: " << c << endl;
 
-    for (int i= 0; i < c; i++) {
-        getline(archivo, line); // Leemos la siguiente linea del archivo que representa el numero de estados que tiene el DFA
-        int numEstados;
-        numEstados = stoi(line);
+    for (int i = 0; i < c; i++) {
+        if (!getline(archivo, line) || line.empty()) continue;
+        int numEstados = stoi(line);
 
-        getline(archivo, line); // Leemos la siguiente linea del archivo que representa el alfabeto del DFA
+        vector<string> alfabeto;
+        vector<int> estadosFinales;
+        vector<vector<int>> MatrizTransicion(numEstados);
+
+        if (!getline(archivo, line) || line.empty()) continue;
         stringstream ss(line);
         string simbolo;
-        while (getline(ss, simbolo, ' ')) {  // Almacenamos los simbolos del alfabeto en un vector
-            alfabeto.push_back(simbolo);      
+        while (ss >> simbolo) {
+            alfabeto.push_back(simbolo);
         }
 
-        getline(archivo, line); // Leemos la siguiente linea del archivo que representa los estados finales del DFA
+        if (!getline(archivo, line) || line.empty()) continue;
         stringstream cc(line);
-        while (getline(cc, simbolo, ' ')) {  // Almacenamos los esatdos finales en otro vector
-            estadosFinales.push_back(stoi(simbolo));      
+        int estado;
+        while (cc >> estado) {
+            estadosFinales.push_back(estado);
         }
 
-         // Inicializar matriz de transición (vector de vectores)
-         vector<vector<int> > MatrizTransicion(numEstados, vector<int>(alfabeto.size()+1)); //Matriz que simboliza la funicon de transicion
-         for (int i=0; i < numEstados; i++) {
-            getline(archivo, line); // Leemos la siguiente linea del archivo que representa la matriz de transición
+        for (int i = 0; i < numEstados; i++) {
+            if (!getline(archivo, line) || line.empty()) continue;
             stringstream pp(line);
-            for (int j=0; j < (alfabeto.size()+1); j++) {
-                pp >> MatrizTransicion[i][j];
+            vector<int> filaTransicion(alfabeto.size());
+            for (int j = 0; j < alfabeto.size(); j++) {
+                pp >> filaTransicion[j];
             }
-         }
+            MatrizTransicion[i] = filaTransicion;
+        }
 
         minimizarDFA(numEstados, alfabeto, estadosFinales, MatrizTransicion);
-
-        alfabeto.clear();
-        estadosFinales.clear();
-        MatrizTransicion.clear();
-
-        archivo.ignore(); // Ignoramos la siguiente linea del archivo (hay un espacio en blanco)
     }
 }
 
-void minimizarDFA(int &numEstados, vector<string> &alfabeto, vector<int> &estadosFinales, vector<vector<int> > &MatrizTransicion){
+void minimizarDFA(int numEstados, const vector<string> &alfabeto, const vector<int> &estadosFinales, const vector<vector<int>> &MatrizTransicion) {
+    vector<vector<bool>> marked(numEstados, vector<bool>(numEstados, false));
 
-    cout << "Numero de estados: " << numEstados << endl;
-    cout << "Alfabeto: " << endl;
-    for (int i = 0; i < alfabeto.size(); i++) {
-        cout << alfabeto[i] << " ";
-    }
-    cout << endl;
-    cout << "Estados finales: " << endl;
-    for (int i = 0; i < estadosFinales.size(); i++) {
-        cout << estadosFinales[i] << " ";
-    }
-    cout << endl;
-
-    cout << "Matriz de Transición:\n";
-    for (const auto& fila : MatrizTransicion) {
-        for (int valor : fila) {
-            cout << valor << " ";
+    for (int i = 0; i < numEstados; ++i) {
+        for (int j = i + 1; j < numEstados; ++j) {
+            bool iFinal = find(estadosFinales.begin(), estadosFinales.end(), i) != estadosFinales.end();
+            bool jFinal = find(estadosFinales.begin(), estadosFinales.end(), j) != estadosFinales.end();
+            if (iFinal != jFinal) {
+                marked[i][j] = true;
+            }
         }
-        cout << endl;
     }
-    return;
-}
 
+    bool changed;
+    do {
+        changed = false;
+        for (int i = 0; i < numEstados; ++i) {
+            for (int j = i + 1; j < numEstados; ++j) {
+                if (!marked[i][j]) {
+                    for (int k = 0; k < alfabeto.size(); ++k) {
+                        int nextI = MatrizTransicion[i][k];
+                        int nextJ = MatrizTransicion[j][k];
+
+                        if (nextI != nextJ && marked[min(nextI, nextJ)][max(nextI, nextJ)]) {
+                            marked[i][j] = true;
+                            changed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    } while (changed);
+
+    vector<pair<int, int>> equivalentPairs;
+    for (int i = 0; i < numEstados; ++i) {
+        for (int j = i + 1; j < numEstados; ++j) {
+            if (!marked[i][j]) {
+                equivalentPairs.push_back(make_pair(i, j));
+            }
+        }
+    }
+
+    sort(equivalentPairs.begin(), equivalentPairs.end());
+
+    cout << "Pares de estados equivalentes: ";
+    for (const auto& pair : equivalentPairs) {
+        cout << "(" << pair.first << ", " << pair.second << ") ";
+    }
+    cout << endl;
+}
