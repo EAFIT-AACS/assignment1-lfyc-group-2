@@ -106,6 +106,4 @@ These pairs represent states that can be merged to create a smaller, optimized D
 
 ---
 
-## 📌 Contributions & Contact
-If you have any questions or suggestions, feel free to contribute or contact us! 😊
 
