@@ -130,4 +130,4 @@ int main() {
     }
     file.close();  // Close the file after reading all cases
     return 0;
-}
+}   
